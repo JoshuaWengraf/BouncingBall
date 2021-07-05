@@ -1,72 +1,58 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jun  3 10:28:00 2021
+import pygame
+import os
 
-Bouncing ball animation. 
+lightblue = (0, 255, 255)  
+lightgrey = (128,128,128)
 
-@author: jweng
-"""
+image_path = os.path.dirname(__file__) # Where the .py file is located
 
-import turtle
-import time
-from PIL import Image
+timeLimit = 15000 # time in milliseconds
 
+def main():
+    pygame.init()      
 
-def save(counter = [1]):
-    turtle.getcanvas().postscript(file = "BouncingBall{0:03d}.eps".format(counter[0])) 
-    turtle_img = Image.open("BouncingBall{0:03d}.eps".format(counter[0]))
-    turtle_img.save("BouncingBall{0:03d}.png".format(counter[0]), "png")
+    y = 500
+    v = 0 # initial speed
+    g = 0.00015 # gravitational constant
+    t = 0      
+
+    screen = pygame.display.set_mode((640,480))
+    smileyface = pygame.image.load(os.path.join(image_path, 'ball.png')) # The image folder pathball.png')
     
-    counter[0] += 1
-    print(counter)
-    turtle.ontimer(save, int(1000/FRAMES_PER_SECOND))
-    
+    ctr = 0
+    playing = True
+    while playing:
+        event = pygame.event.poll()    
+        if event.type == pygame.QUIT:  
+            break                   
 
-FRAMES_PER_SECOND = 30
-
-
-window = turtle.Screen()
-window.bgcolor("white")
-window.title("Bouncing Ball")
-
-ball = turtle.Turtle()
-ball.shape("circle")
-
-ball.penup() # no drawn line
-ball.speed(0) # set initial speed
-
-y = 150 # initial position
-v = -4 # initial speed
-g = -0.15 # gravitational constant
-
-timelimit = 60
-
-t = 0
-
-save()
-
-start_time = time.time()
-
-running = True
-while True:
-    v = v + g*t
-    y = y + g*t**2 + v*t
-    
-    ball.sety(y)
+        v = v - g*t
+        y = y + v*t - g*t*t/2
         
-    if y < -100:
-        v *= -1
+        y_corrected = 480 - y
+        if y < 400:
+            v = v*-1
     
-    elapsed_time = time.time() - start_time
-    
-    if elapsed_time >= timelimit:
-        print('animation finished')
-        break
-    
-    t = t + 0.01
+        screen.fill(lightblue)
+        screen.blit(smileyface, (140, int(y_corrected)))
 
-turtle.clearscreen()
-turtle.bye()
-
-
+        width = 0.8 * y + 100
         
+        pygame.draw.ellipse(screen, lightgrey, (200,400,int(width),20))
+        t = t + 0.01
+
+        framesPerSecond = 50
+        timeBetweenFrames = 1000/framesPerSecond # (in milliseconds)
+        timeElapsed = pygame.time.get_ticks() # (in milliseconds)
+        if timeElapsed % timeBetweenFrames == 0:
+            pygame.image.save(screen, os.path.join(image_path, 'BouncingBall' + str(ctr) + '.png'))
+            print(ctr)
+            ctr = ctr + 1
+
+        if timeElapsed > timeLimit:
+            pygame.quit()
+            break
+
+        pygame.display.flip()
+
+main()
