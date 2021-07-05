@@ -1,3 +1,6 @@
+""" Animation of a ball falling under gravity. Outputs images at specified intervals """
+
+
 import pygame
 import os
 
